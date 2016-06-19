@@ -1,6 +1,8 @@
 NUGET
   remote: https://www.nuget.org/api/v2
     FSharp.Core (4.0.0.1) - redirects: force
+    Http.fs (1.5.1)
+    Newtonsoft.Json (8.0.3)
 
 GROUP Build
 NUGET

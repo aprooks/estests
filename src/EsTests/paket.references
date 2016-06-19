@@ -1,1 +1,3 @@
 FSharp.Core
+Http.fs
+Newtonsoft.Json
