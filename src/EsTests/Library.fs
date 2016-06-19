@@ -4,6 +4,14 @@ open System
 open HttpClient
 open Newtonsoft.Json
 
+module Json =
+   let settings = Newtonsoft.Json.JsonSerializerSettings()
+   settings.NullValueHandling <- Newtonsoft.Json.NullValueHandling.Ignore
+
+   let serialize obj = (obj,settings)|> Newtonsoft.Json.JsonConvert.SerializeObject
+
+   let deserialize<'a> input = Newtonsoft.Json.JsonConvert.DeserializeObject<'a> input
+
 module EventStore =
   type Envelope = {
     EventId:String
@@ -12,15 +20,12 @@ module EventStore =
     Metadata:String
   }
 
-  let settings = Newtonsoft.Json.JsonSerializerSettings()
-  settings.NullValueHandling <- Newtonsoft.Json.NullValueHandling.Ignore
-
   let postEvent uri (usr, password) stream  (envelopes:Envelope seq)=
                                                         createRequest Post <| uri+"streams/" + stream
                                                         |> withHeader (ContentType "application/vnd.eventstore.events+json")
                                                         |> withHeader (Accept "application/vnd.eventstore.atom+json")
                                                         |> withBasicAuthentication usr password
-                                                        |> withBody ((envelopes, settings) |> Newtonsoft.Json.JsonConvert.SerializeObject)
+                                                        |> withBody (Json.serialize envelopes)
 
   let readStream uri (usr, password) stream =
                         createRequest Get <| (uri + "streams/"+stream)
@@ -31,6 +36,6 @@ module EventStore =
       {
           EventId = System.Guid.NewGuid().ToString()
           EventType = ev.GetType().FullName
-          Data = (ev,settings)|> Newtonsoft.Json.JsonConvert.SerializeObject
+          Data = Json.serialize ev
           Metadata = ""
       }
